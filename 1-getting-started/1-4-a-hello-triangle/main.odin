@@ -138,7 +138,7 @@ main::proc(){
 	gl.BindVertexArray(0)
 
 	// uncomment this call to draw in wireframe polygons.
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 
 	// render loop
     // -----------
