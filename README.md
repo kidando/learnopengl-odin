@@ -1,10 +1,10 @@
 # Learn OpenGL (https://learnopengl.com/) examples in Odin
-This repo contains code for the examples from the [https://learnopengl.com/](Learn OpenGl) site but written in Odin. At the end of each chapter on the site, there is a link to C++ source code. This project replicates that but again, using Odin.
+This repo contains code for the examples from the [Learn OpenGl](https://learnopengl.com/) site but written in Odin. At the end of each chapter on the site, there is a link to C++ source code. This project replicates that but again, using Odin.
 
 ## What you need before you start
-- You will need to install Odin. The [https://odin-lang.org/docs/install/](Getting Started) guide has different options you can follow.
+- You will need to install Odin. The [Getting Started](https://odin-lang.org/docs/install/) guide has different options you can follow.
 - If you have Odin already, I suggest that you update it. I will be using the most recent build of odin as of the time I uploaded this repo onto github.
-- You will need a text editor or IDE. This project was a put together in [https://code.visualstudio.com/](VS Code) (and on Win11) and takes advantage of the tasks feature (more about that below)
+- You will need a text editor or IDE. This project was a put together in [VS Code](https://code.visualstudio.com/) (and on Win11) and takes advantage of the tasks feature (more about that below)
 - That's it. Odin ships with the libraries needed to follow along with the tutorials on learnopengl. Plus the additional assets required are contained in the project.
 
 ## Changes compared the C++ versions
@@ -22,9 +22,9 @@ If you are using VS Code, I have created a ```tasks.json``` file that allows you
 ## If you get stuck or need help
 - In case you run into problems with the code, you can raise an issue.
 - If you need assistance on with Odin and OpenGL, I highly recommend joining two Discord servers
-  - [https://discord.gg/Dh7vnfff](Odin Programming Language)
-  - [https://discord.gg/UvTaBesN](Karl's Community)
-- If you are new to Odin and are interested in learning it, I recommend checking the [https://odin-lang.org/](Odin website). You can also follow [https://www.youtube.com/@GingerGames](Ginger Bill (Creator of Odin) on Youtube). You can also checkout [https://www.youtube.com/@karl_zylinski](Karl's Youtube Channel) and I recommend buying his book [https://odinbook.com/](Odin Book).
+  - [Odin Programming Language](https://discord.gg/Dh7vnfff)
+  - [Karl's Community](https://discord.gg/UvTaBesN)
+- If you are new to Odin and are interested in learning it, I recommend checking the [Odin website](https://odin-lang.org/). You can also follow [Ginger Bill (Creator of Odin) on Youtube](https://www.youtube.com/@GingerGames). You can also checkout [Karl's Youtube Channel](https://www.youtube.com/@karl_zylinski) and I recommend buying his book [Odin Book](https://odinbook.com/).
 - There are more and more content creators blogging and making videos about Odin so a simple google and youtube search will most likely give you different options.
 
 ## Want to help or contribute?
