@@ -1,0 +1,31 @@
+# Learn OpenGL (https://learnopengl.com/) examples in Odin
+This repo contains code for the examples from the [https://learnopengl.com/](Learn OpenGl) site but written in Odin. At the end of each chapter on the site, there is a link to C++ source code. This project replicates that but again, using Odin.
+
+## What you need before you start
+- You will need to install Odin. The [https://odin-lang.org/docs/install/](Getting Started) guide has different options you can follow.
+- If you have Odin already, I suggest that you update it. I will be using the most recent build of odin as of the time I uploaded this repo onto github.
+- You will need a text editor or IDE. This project was a put together in [https://code.visualstudio.com/](VS Code) (and on Win11) and takes advantage of the tasks feature (more about that below)
+- That's it. Odin ships with the libraries needed to follow along with the tutorials on learnopengl. Plus the additional assets required are contained in the project.
+
+## Changes compared the C++ versions
+For starters, Odin is not an object-oriented language while C++ is. In the original C++ versions, OOP is used in certain chapters. In this project there are places where I will use functions to minimize code repetition and to make the code a lot more readable.
+
+Also, this is not going to be a "direct translation" from C++ to Odin. There are concepts in Odin that are just different or let me say, interpreted differently. Because of that, I shall try my best using comments, to explain what exactly the Odin code is doing in contrast to it's C++ counterpart.
+
+## How to run the projects
+This is not one large Odin project, instead it is a collection of smaller Odin projects grouped by chapters. To run each project, you will need to enter each folder and run the project from there. Simply run ```odin run .``` and you will be good to go.
+
+However...
+
+If you are using VS Code, I have created a ```tasks.json``` file that allows you to run each project from the root of this collection of folders. You can take advantage of that if you are familiar with tasks.
+
+## If you get stuck or need help
+- In case you run into problems with the code, you can raise an issue.
+- If you need assistance on with Odin and OpenGL, I highly recommend joining two Discord servers
+  - [https://discord.gg/Dh7vnfff](Odin Programming Language)
+  - [https://discord.gg/UvTaBesN](Karl's Community)
+- If you are new to Odin and are interested in learning it, I recommend checking the [https://odin-lang.org/](Odin website). You can also follow [https://www.youtube.com/@GingerGames](Ginger Bill (Creator of Odin) on Youtube). You can also checkout [https://www.youtube.com/@karl_zylinski](Karl's Youtube Channel) and I recommend buying his book [https://odinbook.com/](Odin Book).
+- There are more and more content creators blogging and making videos about Odin so a simple google and youtube search will most likely give you different options.
+
+## Want to help or contribute?
+If you are reading this section, then this project isn't complete yet. It's been a challenge getting things to work/run correctly. Since I'm no Odin expert and this is my first "proper" endeavour into graphics programming, I'm learning and making mistakes. When I get stuck, I rely on the community over at discord. I have a lot of respect for those folks. So I encourage you to join the communities and if you get stuck or I get stuck, we can try help each other out.
