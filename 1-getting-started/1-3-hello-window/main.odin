@@ -1,4 +1,9 @@
 package main
+/*
+CHAPTER: 1-3 HELLO WINDOW
+TUTORIAL: https://learnopengl.com/Getting-started/Hello-Window
+SOURCE CODE IN C++: https://learnopengl.com/code_viewer_gh.php?code=src/1.getting_started/1.2.hello_window_clear/hello_window_clear.cpp
+*/
 
 import "core:fmt"
 import gl "vendor:OpenGL" // GL loader similar to GLAD (if not GLAD itself but in ODIN)
