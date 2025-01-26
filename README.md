@@ -20,12 +20,14 @@ odin run .
 ```
 
 ## If you get stuck or need help
-- In case you run into problems with the code, you can raise an issue.
-- If you need assistance on with Odin and OpenGL, I highly recommend joining two Discord servers
+- Bugs in my code could cause you to get stuck. If you catch a bug, please submit an issue
+- I highly recommend visiting [Learn OpenGL](https://learnopengl.com/) to get in-depth explanations (outside of code) of how things work.
+- If you need assistance with Odin and OpenGL, I highly recommend joining two Discord servers
   - [Odin Programming Language](https://discord.gg/Dh7vnfff)
   - [Karl's Community](https://discord.gg/UvTaBesN)
 - If you are new to Odin and are interested in learning it, I recommend checking the [Odin website](https://odin-lang.org/). You can also follow [Ginger Bill (Creator of Odin) on Youtube](https://www.youtube.com/@GingerGames). You can also checkout [Karl's Youtube Channel](https://www.youtube.com/@karl_zylinski) and I recommend buying his book [Odin Book](https://odinbook.com/).
-- There are more and more content creators blogging and making videos about Odin so a simple google and youtube search will most likely give you different options.
+- It goes without saying but using web search engines helps
+- In case you use ChatGPT or equivalent, just keep in mind that unlike search engine results, these programs tend to return just 1 solution or result that they deem most accurate/relevant. As opposed to a list of different results that you could compare and analyze yourself. That 1 result may not always be correct (I speak from experience 😭)
 
 ## TODO
 - [x] Chapter 1 - Getting Started
