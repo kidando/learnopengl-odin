@@ -4,7 +4,7 @@ This repo contains code for the examples from the [Learn OpenGl](https://learnop
 ## What you need before you start
 - You will need to install Odin. The [Getting Started](https://odin-lang.org/docs/install/) guide has different options you can follow.
 - If you have Odin already, I suggest that you update it. I will be using the most recent build of odin as of the time I uploaded this repo onto github.
-- You will need a text editor or IDE. This project was a put together in [VS Code](https://code.visualstudio.com/) (and on Win11) and takes advantage of the tasks feature (more about that below)
+- You will need a text editor or IDE. This project was a put together in [VS Code](https://code.visualstudio.com/) (and on Win11)
 - That's it. Odin ships with the libraries needed to follow along with the tutorials on learnopengl. Plus the additional assets required are contained in the project.
 
 ## Changes compared the C++ versions
@@ -14,10 +14,10 @@ Also, this is not going to be a "direct translation" from C++ to Odin. There are
 
 ## How to run the projects
 This is not one large Odin project, instead it is a collection of smaller Odin projects grouped by chapters. To run each project, you will need to enter each folder and run the project from there. Simply run ```odin run .``` and you will be good to go.
-
-However...
-
-If you are using VS Code, I have created a ```tasks.json``` file that allows you to run each project from the root of this collection of folders. You can take advantage of that if you are familiar with tasks.
+```
+cd 1-4-a-hello-triangle/
+odin run .
+```
 
 ## If you get stuck or need help
 - In case you run into problems with the code, you can raise an issue.
@@ -27,5 +27,13 @@ If you are using VS Code, I have created a ```tasks.json``` file that allows you
 - If you are new to Odin and are interested in learning it, I recommend checking the [Odin website](https://odin-lang.org/). You can also follow [Ginger Bill (Creator of Odin) on Youtube](https://www.youtube.com/@GingerGames). You can also checkout [Karl's Youtube Channel](https://www.youtube.com/@karl_zylinski) and I recommend buying his book [Odin Book](https://odinbook.com/).
 - There are more and more content creators blogging and making videos about Odin so a simple google and youtube search will most likely give you different options.
 
-## Want to help or contribute?
-If you are reading this section, then this project isn't complete yet. It's been a challenge getting things to work/run correctly. Since I'm no Odin expert and this is my first "proper" endeavour into graphics programming, I'm learning and making mistakes. When I get stuck, I rely on the community over at discord. I have a lot of respect for those folks. So I encourage you to join the communities and if you get stuck or I get stuck, we can try help each other out.
+## TODO
+- [ x ] Chapter 1 - Getting Started
+- [ ] Chapter 2 - Lighting
+- [ ] Chapter 3 - Model Loading
+- [ ] Chapter 4 - Advanced OpenGL
+- [ ] Chapter 5 - Advanced Lighting
+- [ ] Chapter 6 - PBR
+- [ ] Chapter 7 - Debugging
+- [ ] Chapter 8 - Text Rendering
+- [ ] Chapter 9 - 2D Game
