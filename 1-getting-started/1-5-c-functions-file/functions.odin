@@ -29,8 +29,13 @@ renderer_init::proc()->bool{
 	// glfw: initialize and configure
     // ------------------------------
 	glfw.Init()
+<<<<<<< HEAD
 	glfw.WindowHint(glfw.CONTEXT_VERSION_MAJOR,OPENGL_MAJOR_VERSION)
 	glfw.WindowHint(glfw.CONTEXT_VERSION_MINOR,OPENGL_MINOR_VERSION)
+=======
+	glfw.WindowHint(glfw.CONTEXT_VERSION_MAJOR,3)
+	glfw.WindowHint(glfw.CONTEXT_VERSION_MINOR,3)
+>>>>>>> 32ce4f88c2819bdd027c871e95dcc80709b1a243
 	glfw.WindowHint(glfw.OPENGL_PROFILE,glfw.OPENGL_CORE_PROFILE)
 
 	// glfw.WindowHint(glfw.OPENGL_FORWARD_COMPAT,gl.TRUE) // If you are an APPLE
