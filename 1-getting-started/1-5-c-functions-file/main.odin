@@ -14,12 +14,9 @@ import "core:os" // For file management
 SCR_WIDTH:i32:800
 SCR_HEIGHT:i32:600
 
-<<<<<<< HEAD
 OPENGL_MAJOR_VERSION::3
 OPENGL_MINOR_VERSION::3
 
-=======
->>>>>>> 32ce4f88c2819bdd027c871e95dcc80709b1a243
 VERTEX_SHADER_FILEPATH:string:"./triangle.vs"
 FRAGMENT_SHADER_FILEPATH:string:"./triangle.fs"
 
