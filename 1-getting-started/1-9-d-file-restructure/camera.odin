@@ -78,14 +78,9 @@ camera_process_keyboard::proc "c"(camera:^Camera, direction:CameraMovement, delt
 
 // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
 camera_process_mouse_movement::proc "c"(camera:^Camera, xoffset:f32, yoffset:f32, constrainPitch:bool = true) {
-	_xoffset:f32 = xoffset
-	_yoffset:f32 = yoffset
-
-	_xoffset *= camera.mouseSensitivity
-	_yoffset *= camera.mouseSensitivity
-
-	camera.yaw += _xoffset
-	camera.pitch += yoffset
+	
+	camera.yaw += xoffset * camera.mouseSensitivity
+	camera.pitch += yoffset * camera.mouseSensitivity
 
 	// make sure that when pitch is out of bounds, screen doesn't get flipped
 	if constrainPitch{
