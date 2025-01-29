@@ -31,7 +31,7 @@ odin run .
 
 ## TODO
 - [x] Chapter 1 - Getting Started
-- [ ] Chapter 2 - Lighting
+- [x] Chapter 2 - Lighting
 - [ ] Chapter 3 - Model Loading
 - [ ] Chapter 4 - Advanced OpenGL
 - [ ] Chapter 5 - Advanced Lighting
