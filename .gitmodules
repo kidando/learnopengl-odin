@@ -1,0 +1,3 @@
+[submodule "odin-assimp"]
+	path = odin-assimp
+	url = https://github.com/CoolDove/odin-assimp.git
