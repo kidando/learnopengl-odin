@@ -29,6 +29,14 @@ odin run .
 - It goes without saying but using web search engines helps
 - In case you use ChatGPT or equivalent, just keep in mind that unlike search engine results, these programs tend to return just 1 solution or result that they deem most accurate/relevant. As opposed to a list of different results that you could compare and analyze yourself. That 1 result may not always be correct (I speak from experience 😭)
 
+## Notes
+### Chapter 3 Modeling Loading With Assimp
+- To use the [Assimp](https://github.com/assimp/assimp) library for odin to follow along with learnopengl.org import oding bindings library [Odin-Assimp](https://github.com/CoolDove/odin-assimp/tree/master)
+- To follow  along with this project you can import this library into the shared folder of where you have installed your odin repo locally. For example it could be that you installed/cloned odin to ```C:\Odin```. 
+- Open your terminal in this location and cd into the ```shared``` directory so that it becomes ```C:\Odin\shared```
+- Clone the odin-assimp library into this directory by running ```git clone https://github.com/CoolDove/odin-assimp.git```
+- This will allow you to use the assimp library in all your odin projects moving forward. Simply add the following import statement at the top of your odin file ```import assimp "shared:odin-assimp"```
+
 ## TODO
 - [x] Chapter 1 - Getting Started
 - [x] Chapter 2 - Lighting
