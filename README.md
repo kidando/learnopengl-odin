@@ -40,7 +40,7 @@ odin run .
 
 ### Chapter 3 Model Loading With CGLTF (Works 100%)
 - To use the [cgltf package](https://pkg.odin-lang.org/vendor/cgltf/) simply import it from vendor as it ships with odin.
-- Just add ```import cg "vendor:cgltf"``` and you are good to go.
+- Just add ```import "vendor:cgltf"``` at the top of your file. In my implementation I import it as ```import cg "vendor:cgltf"```.
 
 ## TODO
 - [x] Chapter 1 - Getting Started
