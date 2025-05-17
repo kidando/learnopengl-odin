@@ -39,7 +39,7 @@ odin run .
 - I added this just so that I could follow along with learnopengl. However, I highly recommend using the cgltf package I describe next.
 
 ### Chapter 3 Model Loading With CGLTF (Works 100%)
-- The use the [cgltf package](https://pkg.odin-lang.org/vendor/cgltf/) simply import it from vendor as it ships with odin.
+- To use the [cgltf package](https://pkg.odin-lang.org/vendor/cgltf/) simply import it from vendor as it ships with odin.
 - Just add ```import cg "vendor:cgltf"``` and you are good to go.
 
 ## TODO
