@@ -38,6 +38,8 @@ renderer_init::proc()->bool{
 	// configure global opengl state
     // -----------------------------
 	gl.Enable(gl.DEPTH_TEST)
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	return true
 }
