@@ -1,8 +1,8 @@
 package main
 /*
-CHAPTER: 4-1 Depth Testing
-TUTORIAL: https://learnopengl.com/Advanced-OpenGL/Depth-testing
-SOURCE CODE IN C++: https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/1.1.depth_testing/depth_testing.cpp
+CHAPTER: 4-3-1 Blending Discard
+TUTORIAL: https://learnopengl.com/Advanced-OpenGL/Blending
+SOURCE CODE IN C++: https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/3.1.blending_discard/blending_discard.cpp
 */
 
 import "core:fmt"
@@ -43,8 +43,8 @@ main::proc(){
 	// build and compile our shader programs
     // ------------------------------------
     // ourShader, ourShaderOk := shader_init("./shaders/depth_testing.vs","./shaders/depth_testing_visual_dbuffer.fs") // To visualize depth buffer
-    ourShader, ourShaderOk := shader_init("./shaders/depth_testing.vs","./shaders/depth_testing.fs")
-	if !ourShaderOk{
+    shader, shaderOk := shader_init("./shaders/blending.vs","./shaders/blending.fs")
+	if !shaderOk{
 		return
 	}
 	camera_init(&mainCamera,{0.0,0.0,3.0})
@@ -108,6 +108,17 @@ main::proc(){
          5.0, -0.5, -5.0,  2.0, 2.0								
     }
 
+	transparentVertices:[]f32 = {
+        // positions      // texture Coords (swapped y coordinates because texture is flipped upside down)
+        0.0,  0.5,  0.0,  0.0,  0.0,
+        0.0, -0.5,  0.0,  0.0,  -1.0,
+        1.0, -0.5,  0.0,  1.0,  -1.0,
+
+        0.0,  0.5,  0.0,  0.0,  0.0,
+        1.0, -0.5,  0.0,  1.0,  -1.0,
+        1.0,  0.5,  0.0,  1.0,  0.0
+    };
+
 	// CUBE VAO
 	cubeVBO, cubeVAO:u32
 	gl.GenVertexArrays(1, &cubeVAO)
@@ -130,10 +141,20 @@ main::proc(){
 	gl.BindVertexArray(planeVAO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, planeVBO)
 	gl.BufferData(gl.ARRAY_BUFFER,size_of(f32)*len(planeVertices), raw_data(planeVertices), gl.STATIC_DRAW)
-	// plane position attribute
 	gl.EnableVertexAttribArray(0)
 	gl.VertexAttribPointer(0,3,gl.FLOAT, gl.FALSE,5 * size_of(f32), cast(uintptr)0)
-	// plane texture coord attribute
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointer(1,2,gl.FLOAT, gl.FALSE,5 * size_of(f32), cast(uintptr)(3*size_of(f32)))
+
+	// Transparent VAO
+	transparentVBO, transparentVAO:u32
+	gl.GenVertexArrays(1, &transparentVAO)
+	gl.GenBuffers(1, &transparentVBO)
+	gl.BindVertexArray(transparentVAO)
+	gl.BindBuffer(gl.ARRAY_BUFFER, transparentVBO)
+	gl.BufferData(gl.ARRAY_BUFFER,size_of(f32)*len(transparentVertices), raw_data(transparentVertices), gl.STATIC_DRAW)
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointer(0,3,gl.FLOAT, gl.FALSE,5 * size_of(f32), cast(uintptr)0)
 	gl.EnableVertexAttribArray(1)
 	gl.VertexAttribPointer(1,2,gl.FLOAT, gl.FALSE,5 * size_of(f32), cast(uintptr)(3*size_of(f32)))
 	gl.BindVertexArray(0)
@@ -142,12 +163,22 @@ main::proc(){
     // -------------
     cubeTexture:u32  = loadTexture("./assets/textures/marble.jpg")
     floorTexture:u32 = loadTexture("./assets/textures/metal.png")
+    transparentTexture:u32 = loadTexture("./assets/textures/grass.png")
 
+	// transparent vegetation locations
+    // --------------------------------
+	vegetation:[]glm.vec3 = {
+		{-1.5,0.0,-0.48},
+		{1.5,0.0,0.51},
+		{0.0,0.0,0.7},
+		{-0.3,0.0,-2.3},
+		{0.5,0.0,-0.6}
+	}
 
 	// shader configuration
     // --------------------
-	gl.UseProgram(ourShader)
-	shader_set_int(ourShader,"texture1",0)
+	gl.UseProgram(shader)
+	shader_set_int(shader,"texture1",0)
 
 	// render loop
     // -----------
@@ -168,7 +199,7 @@ main::proc(){
         gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		// be sure to activate shader when setting uniforms/drawing objects
-		gl.UseProgram(ourShader)
+		gl.UseProgram(shader)
 
 		// view/projection transformations
 		projection:glm.mat4 = glm.mat4Perspective(
@@ -178,33 +209,43 @@ main::proc(){
 			100
 		)
 		view:glm.mat4 = camera_get_view_matrix(&mainCamera)
-		shader_set_mat4(ourShader,"projection",&projection[0][0])
-		shader_set_mat4(ourShader,"view",&view[0][0])
+		shader_set_mat4(shader,"projection",&projection[0][0])
+		shader_set_mat4(shader,"view",&view[0][0])
 
 		// world transformation
 		model:glm.mat4 = glm.mat4(1.0)
-		shader_set_mat4(ourShader,"model",&model[0][0])
+		shader_set_mat4(shader,"model",&model[0][0])
 
 		// Cubes
 		gl.BindVertexArray(cubeVAO)
         gl.ActiveTexture(gl.TEXTURE0)
         gl.BindTexture(gl.TEXTURE_2D, cubeTexture)
 		model = glm.mat4Translate({-1.0,0.0,-1.0})
-		shader_set_mat4(ourShader,"model",&model[0][0])
+		shader_set_mat4(shader,"model",&model[0][0])
 		gl.DrawArrays(gl.TRIANGLES,0,36)
 		model = glm.mat4(1.0)
 		model = glm.mat4Translate({2.0,0.0,0.0})
-		shader_set_mat4(ourShader,"model",&model[0][0])
+		shader_set_mat4(shader,"model",&model[0][0])
 		gl.DrawArrays(gl.TRIANGLES,0,36)
 
 		// Floor
 		gl.BindVertexArray(planeVAO)
 		gl.BindTexture(gl.TEXTURE_2D, floorTexture)
 		model = glm.mat4(1.0)
-		shader_set_mat4(ourShader,"model",&model[0][0])
+		shader_set_mat4(shader,"model",&model[0][0])
 		gl.DrawArrays(gl.TRIANGLES,0,6)
+		// Vegetation
+		gl.BindVertexArray(transparentVAO)
+		gl.BindTexture(gl.TEXTURE_2D, transparentTexture)
+		
+		for i in 0..<len(vegetation){
+			model = glm.mat4(1.0)
+			model = glm.mat4Translate(vegetation[i])
+			shader_set_mat4(shader,"model",&model[0][0])
+			gl.DrawArrays(gl.TRIANGLES,0,6)
+		}
+		
 		gl.BindVertexArray(0)
-
 
 
 		
@@ -222,8 +263,10 @@ main::proc(){
 
 	gl.DeleteVertexArrays(1, &cubeVAO)
     gl.DeleteVertexArrays(1, &planeVAO)
+    gl.DeleteVertexArrays(1, &transparentVAO)
     gl.DeleteBuffers(1, &cubeVBO)
     gl.DeleteBuffers(1, &planeVBO)
+    gl.DeleteBuffers(1, &transparentVBO)
 
 	// glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
