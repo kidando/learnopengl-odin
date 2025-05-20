@@ -1,8 +1,7 @@
 package main
 /*
-CHAPTER: 4-4 Framebuffers
+CHAPTER: 4-4-1 Framebuffers
 TUTORIAL: https://learnopengl.com/Advanced-OpenGL/Framebuffers
-SOURCE CODE IN C++: https://github.com/Hengle/LearnOpenGL-1/blob/master/src/4.advanced_opengl/5.1.framebuffers/framebuffers.cpp
 */
 
 import "core:fmt"
