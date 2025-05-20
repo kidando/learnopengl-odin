@@ -41,12 +41,16 @@ odin run .
 ### Chapter 3 Model Loading With CGLTF (Works 100%)
 - To use the [cgltf package](https://pkg.odin-lang.org/vendor/cgltf/) simply import it from vendor as it ships with odin.
 - Just add ```import "vendor:cgltf"``` at the top of your file. In my implementation I import it as ```import cg "vendor:cgltf"```.
+- This will be the loader used for the rest of the lessons
+
+### Chapter 4 Differences in how the final application build looks
+- There is a slight (or maybe not so slight) difference in my application build compared to what learnopengl has as their application build. In this chapter it is the first time we use random number generation and if I were to guess, that is where the cause of the difference may lie. However, this goal of the chapters are met regardless of the visual difference.
 
 ## TODO
 - [x] Chapter 1 - Getting Started
 - [x] Chapter 2 - Lighting
 - [x] Chapter 3 - Model Loading
-- [ ] Chapter 4 - Advanced OpenGL
+- [x] Chapter 4 - Advanced OpenGL
 - [ ] Chapter 5 - Advanced Lighting
 - [ ] Chapter 6 - PBR
 - [ ] Chapter 7 - Debugging
