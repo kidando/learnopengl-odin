@@ -24,6 +24,8 @@ renderer_init::proc()->bool{
 	}
 	glfw.MakeContextCurrent(window)
 	glfw.SetFramebufferSizeCallback(window, framebuffer_size_callback)
+	glfw.SetCursorPosCallback(window, mouse_callback)
+	glfw.SetScrollCallback(window, scroll_callback)
 	// tell GLFW to capture our mouse
     glfw.SetInputMode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
 
