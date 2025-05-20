@@ -30,8 +30,6 @@ lastY:f32 = f32(SCR_HEIGHT)/2.0
 deltaTime:f32 = 0.0 // time between current frame and last frame
 lastFrame:f32 = 0.0
 
-// lighting
-lightPos:glm.vec3 = {1.2, 1.0, 2.0}
 
 main::proc(){
 	// glfw: initialize and configure
