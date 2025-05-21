@@ -1,8 +1,8 @@
 package main
 /*
-CHAPTER: 5-1 Advanced Lighting
+CHAPTER: 5-2 Gamma Correction
 TUTORIAL: https://learnopengl.com/Advanced-Lighting/Advanced-Lighting
-SOURCE CODE IN C++: https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/1.advanced_lighting/advanced_lighting.cpp
+SOURCE CODE IN C++: https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/2.gamma_correction/gamma_correction.cpp
 */
 
 import "core:fmt"
@@ -30,8 +30,8 @@ lastY:f32 = f32(SCR_HEIGHT)/2.0
 deltaTime:f32 = 0.0 // time between current frame and last frame
 lastFrame:f32 = 0.0
 
-blinn:i32 = 0
-blinnKeyPressed:bool = false
+gammaEnabled:i32 = 0
+gammaKeyPressed:bool = false
 
 
 main::proc(){
@@ -43,7 +43,7 @@ main::proc(){
 	stbi.set_flip_vertically_on_load(1)
 	// build and compile our shader programs
     // ------------------------------------
-    shader, shaderOk := shader_init("./shaders/advanced_lighting.vs","./shaders/advanced_lighting.fs")
+    shader, shaderOk := shader_init("./shaders/gamma_correction.vs","./shaders/gamma_correction.fs")
 	if !shaderOk{
 		return
 	}
@@ -80,6 +80,7 @@ main::proc(){
 	// load textures
     // -------------
     floorTexture:u32 = loadTexture("./assets/textures/wood.png")
+    floorTextureGammaCorrected:u32 = loadTexture("./assets/textures/wood.png")
 
 
 	// shader configuration
@@ -89,7 +90,19 @@ main::proc(){
 
 	// lighting info
     // -------------
-	lightPos:glm.vec3
+	lightPositions:[]glm.vec3 = {
+		{-3.0,0.0,0.0},
+		{-1.0,0.0,0.0},
+		{1.0,0.0,0.0},
+		{3.0,0.0,0.0},
+	}
+
+	lightColors:[]glm.vec3 = {
+		glm.vec3(0.25),
+		glm.vec3(0.50),
+		glm.vec3(0.75),
+		glm.vec3(1.00),
+	}
 
 	// render loop
     // -----------
@@ -123,20 +136,21 @@ main::proc(){
 		shader_set_mat4(shader,"view",&view[0][0])
 
 		// set light uniforms
+		gl.Uniform3fv(gl.GetUniformLocation(shader,"lightPositions"),4,&lightPositions[0][0])
+		gl.Uniform3fv(gl.GetUniformLocation(shader,"lightColors"),4,&lightColors[0][0])
 		shader_set_vec3_vec(shader,"viewPos",&mainCamera.position[0])
-		shader_set_vec3_vec(shader,"lightPos",&lightPos[0])
-		shader_set_int(shader, "blinn",blinn)
+		shader_set_int(shader, "gamma",gammaEnabled)
 		
 		// Floor
 		gl.BindVertexArray(planeVAO)
         gl.ActiveTexture(gl.TEXTURE0)
-        gl.BindTexture(gl.TEXTURE_2D, floorTexture)
+        gl.BindTexture(gl.TEXTURE_2D, gammaEnabled == 1? floorTextureGammaCorrected : floorTexture)
         gl.DrawArrays(gl.TRIANGLES, 0, 6)
 		
-		if blinn == 1{
-			fmt.printfln("Blinn-Phong")
+		if gammaEnabled == 1{
+			fmt.printfln("Gamma Enabled")
 		}else{
-			fmt.printfln("Phong")
+			fmt.printfln("Gamma Disabled")
 		}
 		
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -181,17 +195,17 @@ processInput::proc "c"(window:glfw.WindowHandle){
 	if glfw.GetKey(window, glfw.KEY_D) == glfw.PRESS{
 		camera_process_keyboard(&mainCamera, .RIGHT, deltaTime)
 	}
-	if glfw.GetKey(window, glfw.KEY_B) == glfw.PRESS && !blinnKeyPressed{
-		if blinn == 0{
-			blinn = 1
+	if glfw.GetKey(window, glfw.KEY_SPACE) == glfw.PRESS && !gammaKeyPressed{
+		if gammaEnabled == 0{
+			gammaEnabled = 1
 		}else{
-			blinn = 0
+			gammaEnabled = 0
 		}
-		blinnKeyPressed = true
+		gammaKeyPressed = true
 	}
 
-	if glfw.GetKey(window,glfw.KEY_B) == glfw.RELEASE{
-		blinnKeyPressed = false
+	if glfw.GetKey(window,glfw.KEY_SPACE) == glfw.RELEASE{
+		gammaKeyPressed = false
 	}
 
 }
