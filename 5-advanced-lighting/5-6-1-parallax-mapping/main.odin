@@ -1,8 +1,8 @@
 package main
 /*
-CHAPTER: 5-5 Normal Mapping
-TUTORIAL: https://learnopengl.com/Advanced-Lighting/Normal-Mapping
-SOURCE CODE IN C++: https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/4.normal_mapping/normal_mapping.cpp
+CHAPTER: 5-6-1 Parallax Mapping
+TUTORIAL: https://learnopengl.com/Advanced-Lighting/Parallax-Mapping
+SOURCE CODE IN C++: https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/5.1.parallax_mapping/parallax_mapping.cpp
 */
 
 import "core:fmt"
@@ -30,6 +30,8 @@ lastY:f32 = f32(SCR_HEIGHT)/2.0
 deltaTime:f32 = 0.0 // time between current frame and last frame
 lastFrame:f32 = 0.0
 
+heightScale:f32 = 0.1
+
 
 main::proc(){
 	// glfw: initialize and configure
@@ -41,7 +43,7 @@ main::proc(){
 	// build and compile our shader programs
     // ------------------------------------
     // shader, shaderOk := shader_init("./shaders/depth_testing.vs","./shaders/depth_testing_visual_dbuffer.fs") // To visualize depth buffer
-    shader, shaderOk := shader_init("./shaders/normal_mapping.vs","./shaders/normal_mapping.fs")
+    shader, shaderOk := shader_init("./shaders/parallax_mapping.vs","./shaders/parallax_mapping.fs")
 	if !shaderOk{
 		return
 	}
@@ -52,8 +54,9 @@ main::proc(){
 
 	// load textures
     // -------------
-    diffuseMap:u32  = loadTexture("./assets/textures/brickwall.jpg")
-    normalMap:u32 = loadTexture("./assets/textures/brickwall_normal.jpg")
+    diffuseMap:u32  = loadTexture("./assets/textures/bricks2.jpg")
+    normalMap:u32 = loadTexture("./assets/textures/bricks2_normal.jpg")
+    heightMap:u32 = loadTexture("./assets/textures/bricks2_disp.jpg")
 
 
 	// shader configuration
@@ -61,6 +64,7 @@ main::proc(){
 	gl.UseProgram(shader)
 	shader_set_int(shader,"diffuseMap",0)
 	shader_set_int(shader,"normalMap",1)
+	shader_set_int(shader,"depthMap",2)
 
 	// lighting info
     // --------------------
@@ -98,7 +102,7 @@ main::proc(){
 		shader_set_mat4(shader,"projection",&projection[0][0])
 		shader_set_mat4(shader,"view",&view[0][0])
 
-		// Render normal-mapped quad
+		// render parallax-mapped quad
 		model:glm.mat4 = glm.mat4(1.0)
 		model = glm.mat4Rotate(
 			glm.normalize_vec3({1.0,0.0,1.0}),
@@ -107,10 +111,14 @@ main::proc(){
 		shader_set_mat4(shader,"model",&model[0][0])
 		shader_set_vec3_vec(shader,"viewPos",&mainCamera.position[0])
 		shader_set_vec3_vec(shader,"lightPos",&lightPos[0])
+		shader_set_float(shader,"heightScale",heightScale) // adjust with Q and E keys
+		fmt.printfln("heightScale: %v", heightScale)
 		gl.ActiveTexture(gl.TEXTURE0)
 		gl.BindTexture(gl.TEXTURE_2D, diffuseMap)
 		gl.ActiveTexture(gl.TEXTURE1)
 		gl.BindTexture(gl.TEXTURE_2D, normalMap)
+		gl.ActiveTexture(gl.TEXTURE2)
+		gl.BindTexture(gl.TEXTURE_2D, heightMap)
 		renderQuad()
 
 		 // render light source (simply re-renders a smaller plane at the light's position for debugging/visualization)
@@ -165,6 +173,20 @@ processInput::proc "c"(window:glfw.WindowHandle){
 	}
 	if glfw.GetKey(window, glfw.KEY_D) == glfw.PRESS{
 		camera_process_keyboard(&mainCamera, .RIGHT, deltaTime)
+	}
+
+	if glfw.GetKey(window, glfw.KEY_Q) == glfw.PRESS{
+		if heightScale > 0.0{
+			heightScale -= 0.0005
+		}else{
+			heightScale = 0
+		}
+	}else if glfw.GetKey(window, glfw.KEY_E) == glfw.PRESS{
+		if heightScale < 1.0{
+			heightScale += 0.0005
+		}else{
+			heightScale = 1.0
+		}
 	}
 }
 // glfw: whenever the mouse moves, this callback is called
