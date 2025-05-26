@@ -188,7 +188,7 @@ main::proc(){
 		shader_set_mat4(shader,"view",&view[0][0])
         // set light uniforms
         shader_set_vec3_vec(shader,"viewPos",&mainCamera.position[0])
-        shader_set_vec3_vec(shader,"viewPos",&lightPos[0])
+        shader_set_vec3_vec(shader,"lightPos",&lightPos[0])
         shader_set_mat4(shader,"lightSpaceMatrix",&lightSpaceMatrix[0][0])
         gl.ActiveTexture(gl.TEXTURE0)
         gl.BindTexture(gl.TEXTURE_2D, woodTexture)
