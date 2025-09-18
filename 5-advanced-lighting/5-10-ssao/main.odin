@@ -50,51 +50,50 @@ main::proc(){
     // ------------------------------------
 
 
-	shaderGeometryPass, shaderGeometryPassOk := shader_init("./shaders/g_buffer.vs","./shaders/g_buffer.fs")
+	shaderGeometryPass, shaderGeometryPassOk := shader_init("./shaders/ssao_geometry.vs","./shaders/ssao_geometry.fs")
 	if !shaderGeometryPassOk{
 		return
 	}
 
-	shaderLightingPass, shaderLightingPassOk := shader_init("./shaders/deferred_shading.vs","./shaders/deferred_shading.fs")
+	shaderLightingPass, shaderLightingPassOk := shader_init("./shaders/ssao.vs","./shaders/ssao_lighting.fs")
 	if !shaderLightingPassOk{
 		return
 	}
-	shaderLightBox, shaderLightBoxOk := shader_init("./shaders/deferred_light_box.vs","./shaders/deferred_light_box.fs")
-	if !shaderLightBoxOk{
+    shaderSSAO, shaderSSAOOk := shader_init("./shaders/ssao.vs","./shaders/ssao.fs")
+    if !shaderSSAOOk{
+        return
+    }
+	shaderSSAOBlur, shaderSSAOBlurOk := shader_init("./shaders/ssao.vs","./shaders/ssao_blur.fs")
+	if !shaderSSAOBlurOk{
 		return
 	}
 
 
 	camera_init(&mainCamera,{0.0,0.0,5.0})
 
+    // load models
+    // -----------
 	ourModel:Model
 	ai_load_gltf_model(&ourModel, "./assets/models/monkey/monkey.gltf")
 	ai_setup_model_for_gpu(&ourModel)
 	defer ai_destroy_model(&ourModel)
 
-	objectPositions:[9]glm.vec3
-	objectPositions[0] = {-3.0,  -0.5, -3.0}
-	objectPositions[1] = { 0.0,  -0.5, -3.0}
-	objectPositions[2] = { 3.0,  -0.5, -3.0}
-	objectPositions[3] = {-3.0,  -0.5,  0.0}
-	objectPositions[4] = {0.0,  -0.5,  0.0}
-	objectPositions[5] = {3.0,  -0.5,  0.0}
-	objectPositions[6] = {-3.0,  -0.5, 3.0}
-	objectPositions[7] = {0.0,  -0.5,  3.0}
-	objectPositions[8] = {3.0,  -0.5,  3.0}
+	
 
 	// configure g-buffer framebuffer
     // ------------------------------
     gBuffer:u32
     gl.GenFramebuffers(1, &gBuffer)
     gl.BindFramebuffer(gl.FRAMEBUFFER, gBuffer)
-    gPosition, gNormal, gAlbedoSpec:u32
+    gPosition, gNormal, gAlbedo:u32
     // position color buffer
     gl.GenTextures(1, &gPosition)
     gl.BindTexture(gl.TEXTURE_2D, gPosition)
     gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, gl.RGBA, gl.FLOAT, nil)
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+    gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+    gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
     gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, gPosition, 0)
     // normal color buffer
     gl.GenTextures(1, &gNormal)
@@ -104,16 +103,16 @@ main::proc(){
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
     gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, gNormal, 0)
     // color + specular color buffer
-    gl.GenTextures(1, &gAlbedoSpec)
-    gl.BindTexture(gl.TEXTURE_2D, gAlbedoSpec)
+    gl.GenTextures(1, &gAlbedo)
+    gl.BindTexture(gl.TEXTURE_2D, gAlbedo)
     gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, SCR_WIDTH, SCR_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, nil)
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-    gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT2, gl.TEXTURE_2D, gAlbedoSpec, 0)
+    gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT2, gl.TEXTURE_2D, gAlbedo, 0)
+
     // tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
     attachments := []u32{gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1, gl.COLOR_ATTACHMENT2}
     gl.DrawBuffers(i32(len(attachments)), raw_data(attachments))
-
 
     // create and attach depth buffer (renderbuffer)
     rboDepth:u32
@@ -127,36 +126,98 @@ main::proc(){
     }
     gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 
+    // also create framebuffer to hold SSAO processing stage 
+    // -----------------------------------------------------
+    ssaoFBO, ssaoBlurFBO:u32
+    gl.GenFramebuffers(1, &ssaoFBO)
+    gl.GenFramebuffers(1, &ssaoBlurFBO)
+    gl.BindFramebuffer(gl.FRAMEBUFFER, ssaoFBO)
+    ssaoColorBuffer, ssaoColorBufferBlur:u32
+    // SSAO color buffer
+    gl.GenTextures(1, &ssaoColorBuffer)
+    gl.BindTexture(gl.TEXTURE_2D, ssaoColorBuffer)
+    gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RED, SCR_WIDTH, SCR_HEIGHT, 0, gl.RED, gl.FLOAT, nil)
+    gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+    gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+    gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, ssaoColorBuffer, 0)
+    if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE{
+        fmt.printfln("SSAO Framebuffer not complete!")
+    }
+        
+    // and blur stage
+    gl.BindFramebuffer(gl.FRAMEBUFFER, ssaoBlurFBO)
+    gl.GenTextures(1, &ssaoColorBufferBlur)
+    gl.BindTexture(gl.TEXTURE_2D, ssaoColorBufferBlur)
+    gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RED, SCR_WIDTH, SCR_HEIGHT, 0, gl.RED, gl.FLOAT, nil)
+    gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+    gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+    gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, ssaoColorBufferBlur, 0)
+    if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE{
+        fmt.printfln("SSAO Blur Framebuffer not complete!")
+    }
+    gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+
+    // generate sample kernel
+    // ----------------------
+    ssaoKernel:[64]glm.vec3
+    for i in 0..<64{
+        sample := glm.vec3 {
+            rand.float32() * 2.0 - 1.0,  // Random between -1.0 and 1.0
+            rand.float32() * 2.0 - 1.0,  // Random between -1.0 and 1.0
+            rand.float32()               // Random between 0.0 and 1.0
+        }
+        sample = glm.normalize_vec3(sample)
+        sample *= rand.float32()
+        scale:f32 = f32(i)/64.0
+
+        // scale samples s.t. they're more aligned to center of kernel
+        scale = ourLerp(0.1, 1.0, scale * scale)
+        sample *= scale
+        ssaoKernel[i] = sample
+    }
+
+    // generate noise texture
+    // ----------------------
+    ssaoNoise:[16]glm.vec3
+    for i in 0..<16{
+        // rotate around z-axis (in tangent space)
+        noise := glm.vec3 {
+            rand.float32() * 2.0 - 1.0,  
+            rand.float32() * 2.0 - 1.0,  
+            0.0          
+        }
+        
+        ssaoNoise[i] = noise
+    }
+    noiseTexture:u32 
+    gl.GenTextures(1, &noiseTexture)
+    gl.BindTexture(gl.TEXTURE_2D, noiseTexture)
+    gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, 4, 4, 0, gl.RGB, gl.FLOAT, &ssaoNoise[0])
+    gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+    gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+    gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+    gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
+
     // lighting info
     // -------------
-    NR_LIGHTS:u32: 32
-    lightPositions:[dynamic]glm.vec3
-    lightColors:[dynamic]glm.vec3
-    defer {
-        delete(lightPositions)
-        delete(lightColors)
-    }
-    for i:u32; i < NR_LIGHTS; i+=1{
-        // calculate slightly random offsets
-        xPos:f32 = (f32(rand.int31_max(100)) / 100.0) * 6.0 - 3.0
-        yPos:f32 = (f32(rand.int31_max(100))/ 100.0) * 6.0 - 4.0
-        zPos:f32 = (f32(rand.int31_max(100)) / 100.0) * 6.0 - 3.0
-        pos:glm.vec3 = {xPos, yPos, zPos}
-        append(&lightPositions,pos)
-        // also calculate random color
-        rColor:f32 = (f32(rand.int31_max(100)) / 200.0) + 0.5 // between 0.5 and 1.0
-        gColor:f32 = (f32(rand.int31_max(100)) / 200.0) + 0.5 // between 0.5 and 1.0
-        bColor:f32 = (f32(rand.int31_max(100)) / 200.0) + 0.5// between 0.5 and 1.0
-        color:glm.vec3 = {rColor, gColor, bColor}
-        append(&lightColors,color)
-    }
+    lightPos:glm.vec3 = {2.0, 4.0, -2.0}
+    lightColor:glm.vec3 = {0.2, 0.2, 0.7}
 
     // shader configuration
     // --------------------
     gl.UseProgram(shaderLightingPass)
     shader_set_int(shaderLightingPass,"gPosition",0)
     shader_set_int(shaderLightingPass,"gNormal",1)
-    shader_set_int(shaderLightingPass,"gAlbedoSpec",2)
+    shader_set_int(shaderLightingPass,"gAlbedo",2)
+    shader_set_int(shaderLightingPass,"ssao",3)
+    
+    gl.UseProgram(shaderSSAO)
+    shader_set_int(shaderSSAO,"gPosition",0)
+    shader_set_int(shaderSSAO,"gNormal",1)
+    shader_set_int(shaderSSAO,"texNoise",2)
+    
+    gl.UseProgram(shaderSSAOBlur)
+    shader_set_int(shaderSSAOBlur,"ssaoInput",0)
 
 
 	// render loop
@@ -193,73 +254,82 @@ main::proc(){
             gl.UseProgram(shaderGeometryPass)
             shader_set_mat4(shaderGeometryPass,"projection",&projection[0][0])
 			shader_set_mat4(shaderGeometryPass,"view",&view[0][0])
-            for i in 0..<len(objectPositions){
-                model = glm.mat4(1.0)
-                model = glm.mat4Translate(objectPositions[i])
-                model *= glm.mat4Scale(glm.vec3(0.5))
-                shader_set_mat4(shaderGeometryPass,"model",&model[0][0])
-                ai_draw_model(&ourModel,shaderGeometryPass)
-            }
+
+            
+            // Room Cube
+            model = glm.mat4(1.0)
+            model = glm.mat4Translate({0.0,7.0,0.0})
+            model *= glm.mat4Scale(glm.vec3(7.5))
+            shader_set_mat4(shaderGeometryPass,"model",&model[0][0])
+            shader_set_int(shaderGeometryPass,"invertedNormals",1) // invert normals as we're inside the cube
+            renderCube()
+            shader_set_int(shaderGeometryPass,"invertedNormals",0) 
+
+            // backpack model on the floor
+            model = glm.mat4(1.0)
+            model = glm.mat4Translate({0.0,5.0,0.0})
+            model = glm.mat4Rotate({1.0,0.0,0.0}, glm.radians_f32(-90))
+            model *= glm.mat4Scale(glm.vec3(1.0))
+            shader_set_mat4(shaderGeometryPass,"model",&model[0][0])
+            ai_draw_model(&ourModel,shaderGeometryPass)
         gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 
-        // 2. lighting pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
-        // -----------------------------------------------------------------------------------------------------------------------
+        
+        // 2. generate SSAO texture
+        // ------------------------
+        gl.BindFramebuffer(gl.FRAMEBUFFER, ssaoFBO)
+            gl.Clear(gl.COLOR_BUFFER_BIT)
+            gl.UseProgram(shaderSSAO)
+            // Send kernel + rotation 
+            for i in 0..<64{
+                samples_name := strings.clone_to_cstring(fmt.tprintf("samples[%d]", i))
+                shader_set_vec3_vec(shaderSSAO, samples_name, &ssaoKernel[i][0])
+            }
+            shader_set_mat4(shaderSSAO,"projection",&projection[0][0])
+            gl.ActiveTexture(gl.TEXTURE0)
+            gl.BindTexture(gl.TEXTURE_2D, gPosition)
+            gl.ActiveTexture(gl.TEXTURE1)
+            gl.BindTexture(gl.TEXTURE_2D, gNormal)
+            gl.ActiveTexture(gl.TEXTURE2)
+            gl.BindTexture(gl.TEXTURE_2D, noiseTexture)
+            renderQuad()
+        gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+
+
+        // 3. blur SSAO texture to remove noise
+        // ------------------------------------
+        gl.BindFramebuffer(gl.FRAMEBUFFER, ssaoBlurFBO)
+            gl.Clear(gl.COLOR_BUFFER_BIT)
+            gl.UseProgram(shaderSSAOBlur)
+            gl.ActiveTexture(gl.TEXTURE0)
+            gl.BindTexture(gl.TEXTURE_2D, ssaoColorBuffer)
+            renderQuad()
+        gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+
+
+        // 4. lighting pass: traditional deferred Blinn-Phong lighting with added screen-space ambient occlusion
+        // -----------------------------------------------------------------------------------------------------
         gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
         gl.UseProgram(shaderLightingPass)
+        // send light relevant uniforms
+        lightPosVec4:glm.vec4 = {lightPos.x,lightPos.y,lightPos.z,1.0}
+        lightPosView := (camera_get_view_matrix(&mainCamera) * glm.vec4{lightPos.x, lightPos.y, lightPos.z, 1.0}).xyz
+        shader_set_vec3_vec(shaderLightingPass,"light.Position",&lightPosView[0])
+        shader_set_vec3_vec(shaderLightingPass,"light.Color",&lightColor[0])
+        // Update attenuation parameters
+        linear:f32:0.09
+        quadratic:f32:0.032
+        shader_set_float(shaderLightingPass,"light.Linear",linear)
+        shader_set_float(shaderLightingPass,"light.Quadratic",quadratic)
         gl.ActiveTexture(gl.TEXTURE0)
         gl.BindTexture(gl.TEXTURE_2D, gPosition)
         gl.ActiveTexture(gl.TEXTURE1)
         gl.BindTexture(gl.TEXTURE_2D, gNormal)
         gl.ActiveTexture(gl.TEXTURE2)
-        gl.BindTexture(gl.TEXTURE_2D, gAlbedoSpec)
-        // send light relevant uniforms
-        for i in 0..<len(lightPositions){
-            // shader_set_vec3_vec(shader,strings.clone_to_cstring(fmt.tprintf("lights[%d].Position",i)),&lightPositions[i][0])
-            // shader_set_vec3_vec(shader,strings.clone_to_cstring(fmt.tprintf("lights[%d].Color",i)),&lightColors[i][0])
-            // update attenuation parameters and calculate radius
-            linear:f32:0.7
-            quadratic:f32:1.8
-            // shader_set_float(shaderLightingPass,strings.clone_to_cstring(fmt.tprintf("lights[%d].Position",i)),linear)
-            // shader_set_float(shaderLightingPass,strings.clone_to_cstring(fmt.tprintf("lights[%d].Quadratic",i)),quadratic)
-
-            pos_name := strings.clone_to_cstring(fmt.tprintf("lights[%d].Position", i))
-            color_name := strings.clone_to_cstring(fmt.tprintf("lights[%d].Color", i))
-            linear_name := strings.clone_to_cstring(fmt.tprintf("lights[%d].Linear", i))
-            quadratic_name := strings.clone_to_cstring(fmt.tprintf("lights[%d].Quadratic", i))
-
-            shader_set_vec3_vec(shaderLightingPass, pos_name, &lightPositions[i][0])
-            shader_set_vec3_vec(shaderLightingPass, color_name, &lightColors[i][0])
-            shader_set_float(shaderLightingPass, linear_name, linear)
-            shader_set_float(shaderLightingPass, quadratic_name, quadratic)
-        }
-        shader_set_vec3_vec(shaderLightingPass,"viewPos",&mainCamera.position[0])
-        // finally render quad
+        gl.BindTexture(gl.TEXTURE_2D, gAlbedo)
+        gl.ActiveTexture(gl.TEXTURE3) // add extra SSAO texture to lighting pass
+        gl.BindTexture(gl.TEXTURE_2D, ssaoColorBufferBlur)
         renderQuad()
-
-        // 2.5. copy content of geometry's depth buffer to default framebuffer's depth buffer
-        // ----------------------------------------------------------------------------------
-        gl.BindFramebuffer(gl.READ_FRAMEBUFFER, gBuffer)
-        gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0) // write to default framebuffer
-        // blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
-        // the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the 		
-        // depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
-        gl.BlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, gl.DEPTH_BUFFER_BIT, gl.NEAREST)
-        gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-
-        // 3. render lights on top of scene
-        // --------------------------------
-        gl.UseProgram(shaderLightBox)
-        shader_set_mat4(shaderLightBox,"projection",&projection[0][0])
-        shader_set_mat4(shaderLightBox,"view",&view[0][0])
-        for i in 0..<len(lightPositions){
-            model = glm.mat4(1.0)
-            model = glm.mat4Translate(lightPositions[i])
-            model *= glm.mat4Scale(glm.vec3(0.125))
-            shader_set_mat4(shaderLightBox,"model",&model[0][0])
-            shader_set_vec3_vec(shaderLightBox,"lightColor",&lightColors[i][0])
-            renderCube()
-        }
-		
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -495,4 +565,8 @@ renderQuad::proc(){
     gl.BindVertexArray(quadVAO)
     gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
     gl.BindVertexArray(0)
+}
+
+ourLerp::proc(a, b, f:f32)->f32{
+    return a + f * (b - a)
 }
