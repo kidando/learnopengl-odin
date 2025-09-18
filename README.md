@@ -60,7 +60,7 @@ odin run .
 - [x] Chapter 2 - Lighting
 - [x] Chapter 3 - Model Loading
 - [x] Chapter 4 - Advanced OpenGL
-- [ ] Chapter 5 - Advanced Lighting
+- [x] Chapter 5 - Advanced Lighting
 - [ ] Chapter 6 - PBR
 - [ ] Chapter 7 - Debugging
 - [ ] Chapter 8 - Text Rendering
