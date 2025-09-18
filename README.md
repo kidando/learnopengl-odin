@@ -38,13 +38,22 @@ odin run .
 - This will allow you to use the assimp library in all your odin projects moving forward. Simply add the following import statement at the top of your odin file ```import assimp "shared:odin-assimp"```
 - I added this just so that I could follow along with learnopengl. However, I highly recommend using the cgltf package I describe next.
 
-### Chapter 3 Model Loading With CGLTF (Works 100%)
+### Chapter 3 Model Loading With CGLTF (Works 100% for simple models)
 - To use the [cgltf package](https://pkg.odin-lang.org/vendor/cgltf/) simply import it from vendor as it ships with odin.
 - Just add ```import "vendor:cgltf"``` at the top of your file. In my implementation I import it as ```import cg "vendor:cgltf"```.
 - This will be the loader used for the rest of the lessons
+- NOTE: This is not a "production ready" solution. Models that are more complex in structure may need the ```asset_importer.odin``` file to be updated to work correctly. 
 
 ### Chapter 4 Differences in how the final application build looks
 - There is a slight (or maybe not so slight) difference in my application build compared to what learnopengl has as their application build. In this chapter it is the first time we use random number generation and if I were to guess, that is where the cause of the difference may lie. However, this goal of the chapters are met regardless of the visual difference.
+
+### Chapter 5 - Point Shadows not working
+- For some reason, shadows are not being cast as seen in the Point Shadows section on LearnOpenGL. The odin code is more or less identical to it's C++ counter part.
+- I have a couple of guesses why.
+  - Something to do with the graphics card I'm using. It's an IntelHD or UHD. Maybe the way cubemaps are drawn or how the card is instructed to draw them is different (I really have no idea).
+  - Something about the opengl specification regarding cubemap generation has changed from the time this chapter was published over at learnopengl.org (more than a decade ago, but again... I really have no idea).
+  - Something to do with the shaders. Specifically the geometry shader and how it constructs the shadows. I did notice that trying to uncomment sections of the code in the fragment shader that are meant to be used for testing shadow generation and depth values generation cause a segmentation fault when trying to run the program. So I'm guessing that the GLSL code probably needs some kind of update. Maybe things have change (but as always... I really have no idea).
+- If you manage to figure out how to get shadows working, please share the find.
 
 ## TODO
 - [x] Chapter 1 - Getting Started
