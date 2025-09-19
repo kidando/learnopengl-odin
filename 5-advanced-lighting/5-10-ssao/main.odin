@@ -32,10 +32,6 @@ lastY:f32 = f32(SCR_HEIGHT)/2.0
 deltaTime:f32 = 0.0 // time between current frame and last frame
 lastFrame:f32 = 0.0
 
-bloom:i32 = 1
-bloomKeyPressed:bool = false
-exposure:f32 = 1.0
-
 
 
 
