@@ -66,5 +66,5 @@ odin run .
 - [x] Chapter 5 - Advanced Lighting
 - [x] Chapter 6 - PBR
 - [x] Chapter 7 - Debugging
-- [ ] Chapter 8 - Text Rendering
+- [x] Chapter 8 - Text Rendering
 - [ ] Chapter 9 - 2D Game
