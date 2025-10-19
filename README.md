@@ -55,6 +55,9 @@ odin run .
   - Something to do with the shaders. Specifically the geometry shader and how it constructs the shadows. I did notice that trying to uncomment sections of the code in the fragment shader that are meant to be used for testing shadow generation and depth values generation cause a segmentation fault when trying to run the program. So I'm guessing that the GLSL code probably needs some kind of update. Maybe things have change (but as always... I really have no idea).
 - If you manage to figure out how to get shadows working, please share the find.
 
+### Chapter 7 - Debugging
+- This chapter deals with debugging and the tools you might find helpful when working in OpenGL. So there was not too much I did in terms of "translating" c++ code to odin. But the ```main.odin``` file in this chapter's folder contains 2 functions that help you get started with getting openGl errors and window context errors (from GLFW).
+
 ## TODO
 - [x] Chapter 1 - Getting Started
 - [x] Chapter 2 - Lighting
@@ -62,6 +65,6 @@ odin run .
 - [x] Chapter 4 - Advanced OpenGL
 - [x] Chapter 5 - Advanced Lighting
 - [x] Chapter 6 - PBR
-- [ ] Chapter 7 - Debugging
+- [x] Chapter 7 - Debugging
 - [ ] Chapter 8 - Text Rendering
 - [ ] Chapter 9 - 2D Game
